@@ -22,6 +22,13 @@
         <el-form-item label="手机号" prop="phone">
           <el-input v-model="queryParams.phone" placeholder="请输入手机号" clearable />
         </el-form-item>
+        <el-form-item label="用户类型" prop="userType">
+          <el-select v-model="queryParams.userType" placeholder="用户类型" clearable>
+            <el-option label="普通用户" :value="0" />
+            <el-option label="农村管理员" :value="1" />
+            <el-option label="平台管理员" :value="3" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-select v-model="queryParams.status" placeholder="用户状态" clearable>
             <el-option label="启用" value="1" />
@@ -42,7 +49,7 @@
         <el-table-column prop="nickname" label="昵称" width="120" />
         <el-table-column prop="phone" label="手机号" width="120" />
         <el-table-column prop="email" label="邮箱" width="180" />
-        <el-table-column prop="roleName" label="角色" width="120" />
+        <el-table-column prop="userTypeName" label="用户类型" width="120" />
         <el-table-column prop="status" label="状态">
           <template #default="scope">
             <el-tag :type="scope.row.status === '1' ? 'success' : 'danger'">
@@ -121,14 +128,11 @@
           <el-form-item label="密码" prop="password" v-if="!form.id">
             <el-input v-model="form.password" type="password" placeholder="请输入密码" />
           </el-form-item>
-          <el-form-item label="角色" prop="roleId">
-            <el-select v-model="form.roleId" placeholder="请选择角色">
-              <el-option 
-                v-for="role in roles" 
-                :key="role.id" 
-                :label="role.name" 
-                :value="role.id" 
-              />
+          <el-form-item label="用户类型" prop="userType">
+            <el-select v-model="form.userType" placeholder="请选择用户类型">
+              <el-option label="普通用户" :value="0" />
+              <el-option label="农村管理员" :value="1" />
+              <el-option label="平台管理员" :value="3" />
             </el-select>
           </el-form-item>
           <el-form-item label="状态" prop="status">
@@ -152,6 +156,13 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '../../store/user'
 
+// 用户类型映射
+const USER_TYPE_NAMES = {
+  0: '普通用户',
+  1: '农村管理员',
+  3: '平台管理员'
+}
+
 // 模拟后端数据
 const mockUsers = [
   {
@@ -160,18 +171,18 @@ const mockUsers = [
     nickname: '系统管理员',
     phone: '13800138000',
     email: 'admin@example.com',
-    roleId: 1,
-    roleName: '管理员',
+    userType: 3,
+    userTypeName: '平台管理员',
     status: '1'
   },
   {
     id: 2,
-    username: 'editor',
-    nickname: '编辑用户',
+    username: 'rural',
+    nickname: '农村管理员',
     phone: '13800138001',
-    email: 'editor@example.com',
-    roleId: 2,
-    roleName: '编辑员',
+    email: 'rural@example.com',
+    userType: 1,
+    userTypeName: '农村管理员',
     status: '1'
   },
   {
@@ -180,16 +191,10 @@ const mockUsers = [
     nickname: '普通用户',
     phone: '13800138002',
     email: 'user@example.com',
-    roleId: 3,
-    roleName: '用户',
+    userType: 0,
+    userTypeName: '普通用户',
     status: '1'
   }
-]
-
-const mockRoles = [
-  { id: 1, name: '管理员' },
-  { id: 2, name: '编辑员' },
-  { id: 3, name: '用户' }
 ]
 
 // 用户列表数据
@@ -203,6 +208,7 @@ const userStore = useUserStore()
 const queryParams = reactive({
   username: '',
   phone: '',
+  userType: '',
   status: '',
   pageNum: 1,
   pageSize: 10
@@ -222,7 +228,7 @@ const form = reactive({
   password: '',
   phone: '',
   email: '',
-  roleId: undefined,
+  userType: 0,
   status: '1'
 })
 
@@ -237,11 +243,8 @@ const rules = {
     { required: true, message: '密码不能为空', trigger: 'blur' },
     { min: 6, max: 20, message: '密码长度必须在 6 到 20 个字符之间', trigger: 'blur' }
   ],
-  roleId: [{ required: true, message: '请选择用户角色', trigger: 'change' }]
+  userType: [{ required: true, message: '请选择用户类型', trigger: 'change' }]
 }
-
-// 可用角色列表
-const roles = ref(mockRoles)
 
 // 查询用户列表
 const getList = () => {
@@ -259,6 +262,10 @@ const getList = () => {
     
     if (queryParams.phone) {
       filteredList = filteredList.filter(item => item.phone.includes(queryParams.phone))
+    }
+    
+    if (queryParams.userType !== '') {
+      filteredList = filteredList.filter(item => item.userType === queryParams.userType)
     }
     
     if (queryParams.status !== '') {
@@ -280,6 +287,7 @@ const getList = () => {
 const resetQuery = () => {
   queryParams.username = ''
   queryParams.phone = ''
+  queryParams.userType = ''
   queryParams.status = ''
   queryParams.pageNum = 1
   getList()
@@ -313,7 +321,7 @@ const handleAdd = () => {
     password: '',
     phone: '',
     email: '',
-    roleId: undefined,
+    userType: 0,
     status: '1'
   })
   
@@ -331,7 +339,7 @@ const handleEdit = (row) => {
     password: '',
     phone: row.phone,
     email: row.email,
-    roleId: row.roleId,
+    userType: row.userType,
     status: row.status
   })
   
@@ -388,21 +396,19 @@ const submitForm = async () => {
       // 编辑模式
       const index = mockUsers.findIndex(item => item.id === form.id)
       if (index !== -1) {
-        const role = roles.value.find(r => r.id === form.roleId)
         mockUsers[index] = {
           ...mockUsers[index],
           ...form,
-          roleName: role ? role.name : ''
+          userTypeName: USER_TYPE_NAMES[form.userType]
         }
       }
       ElMessage.success('修改成功')
     } else {
       // 新增模式
-      const role = roles.value.find(r => r.id === form.roleId)
       mockUsers.push({
         id: mockUsers.length + 1,
         ...form,
-        roleName: role ? role.name : ''
+        userTypeName: USER_TYPE_NAMES[form.userType]
       })
       ElMessage.success('新增成功')
     }

@@ -15,6 +15,19 @@ const routes = [
     }
   },
   {
+    path: '/redirect',
+    component: () => import('../layout/index.vue'),
+    meta: { requiresAuth: true },
+    hidden: true,
+    children: [
+      {
+        path: '/redirect/:path(.*)',
+        component: () => import('../views/redirect/index.vue'),
+        meta: { requiresAuth: true }
+      }
+    ]
+  },
+  {
     path: '/',
     component: () => import('../layout/index.vue'),
     meta: { 
@@ -27,16 +40,28 @@ const routes = [
         component: () => import('../views/dashboard/index.vue'),
         meta: {
           title: '仪表盘',
-          icon: 'dashboard'
+          icon: 'Monitor',
+          keepAlive: true
         }
       }
     ]
+  },
+  // 404页面
+  {
+    path: '/:pathMatch(.*)*',
+    component: () => import('../views/404.vue'),
+    meta: {
+      title: '404',
+      requiresAuth: false
+    },
+    hidden: true
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+  scrollBehavior: () => ({ left: 0, top: 0 })
 })
 
 // 路由守卫

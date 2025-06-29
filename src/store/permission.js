@@ -11,7 +11,7 @@ const asyncRoutes = [
     meta: {
       title: '系统管理',
       icon: 'Setting',
-      roles: ['admin']  // 只有admin角色可访问
+      roles: ['platform_admin']  // 只有平台管理员可访问
     },
     children: [
       {
@@ -21,7 +21,7 @@ const asyncRoutes = [
         meta: {
           title: '用户管理',
           icon: 'User',
-          roles: ['admin']
+          roles: ['platform_admin']
         }
       },
       {
@@ -31,7 +31,7 @@ const asyncRoutes = [
         meta: {
           title: '角色管理',
           icon: 'Lock',
-          roles: ['admin']
+          roles: ['platform_admin']
         }
       },
       {
@@ -41,7 +41,7 @@ const asyncRoutes = [
         meta: {
           title: '菜单管理',
           icon: 'Menu',
-          roles: ['admin']
+          roles: ['platform_admin']
         }
       }
     ]
@@ -53,7 +53,7 @@ const asyncRoutes = [
     meta: {
       title: '个人中心',
       icon: 'UserFilled',
-      roles: ['admin', 'editor', 'user'] // 所有用户可访问
+      roles: ['platform_admin', 'rural_admin', 'user'] // 所有用户可访问
     },
     children: [
       {
@@ -63,7 +63,7 @@ const asyncRoutes = [
         meta: {
           title: '个人信息',
           icon: 'User',
-          roles: ['admin', 'editor', 'user']
+          roles: ['platform_admin', 'rural_admin', 'user']
         }
       }
     ]
@@ -106,8 +106,8 @@ export const usePermissionStore = defineStore('permission', () => {
   const generateRoutes = async (roles) => {
     try {
       let accessedRoutes
-      if (roles.includes('admin')) {
-        // 管理员可访问所有路由
+      if (roles.includes('platform_admin')) {
+        // 平台管理员可访问所有路由
         accessedRoutes = asyncRoutes || []
       } else {
         // 根据角色过滤路由
