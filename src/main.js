@@ -6,6 +6,10 @@ import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
 import './styles/index.scss'
+import directives from './utils/directive'
+
+// 引入路由权限控制
+import './router/permission'
 
 const app = createApp(App)
 
@@ -15,6 +19,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 }
 
 app.use(ElementPlus)
-app.use(router)
 app.use(pinia)
+app.use(router)
+app.use(directives)
 app.mount('#app')

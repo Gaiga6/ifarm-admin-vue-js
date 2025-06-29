@@ -1,9 +1,10 @@
 <template>
   <div class="app-container" :class="{ 'is-dark': themeStore.isDark }">
-    <div class="sidebar">
+    <div class="sidebar" :class="{ 'is-collapsed': isCollapse }">
       <!-- 侧边栏头部Logo -->
       <div class="sidebar-logo">
-        <h1>iFarm Admin</h1>
+        <h1 v-if="!isCollapse">iFarm Admin</h1>
+        <h1 v-else>iFarm</h1>
       </div>
       
       <!-- 侧边栏菜单 -->
@@ -12,19 +13,51 @@
         :background-color="themeStore.isDark ? '#1D1E1F' : '#001529'"
         text-color="#FFFFFF"
         :active-text-color="themeStore.primaryColor"
+        :collapse="isCollapse"
         router
       >
         <!-- 仪表盘菜单项 -->
         <el-menu-item index="/dashboard">
           <el-icon><Monitor /></el-icon>
-          <span>仪表盘</span>
+          <template #title>仪表盘</template>
         </el-menu-item>
         
-        <!-- 可以添加更多菜单项 -->
-        <el-menu-item index="/example">
-          <el-icon><Document /></el-icon>
-          <span>示例页面</span>
-        </el-menu-item>
+        <!-- 动态渲染权限菜单 -->
+        <template v-for="(route, index) in permissionRoutes" :key="index">
+          <!-- 单层菜单 -->
+          <el-menu-item 
+            v-if="route.children && route.children.length === 1" 
+            :index="route.path + '/' + route.children[0].path"
+          >
+            <el-icon v-if="route.children[0].meta && route.children[0].meta.icon">
+              <component :is="route.children[0].meta.icon" />
+            </el-icon>
+            <template #title>{{ route.children[0].meta.title }}</template>
+          </el-menu-item>
+          
+          <!-- 多层菜单 -->
+          <el-sub-menu 
+            v-else-if="route.children && route.children.length > 1" 
+            :index="route.path"
+          >
+            <template #title>
+              <el-icon v-if="route.meta && route.meta.icon">
+                <component :is="route.meta.icon" />
+              </el-icon>
+              <span>{{ route.meta.title }}</span>
+            </template>
+            
+            <!-- 子菜单 -->
+            <template v-for="(subItem, subIndex) in route.children" :key="subIndex">
+              <el-menu-item 
+                v-if="!subItem.children" 
+                :index="route.path + '/' + subItem.path"
+              >
+                {{ subItem.meta.title }}
+              </el-menu-item>
+            </template>
+          </el-sub-menu>
+        </template>
       </el-menu>
     </div>
     
@@ -33,7 +66,11 @@
       <!-- 顶部导航栏 -->
       <div class="navbar">
         <div class="navbar-left">
-          <el-icon class="menu-toggle"><Fold /></el-icon>
+          <el-icon class="menu-toggle" @click="toggleSidebar">
+            <Fold v-if="!isCollapse" />
+            <Expand v-else />
+          </el-icon>
+          <breadcrumb class="hidden-xs-only" />
         </div>
         
         <div class="navbar-right">
@@ -70,13 +107,13 @@
           <!-- 用户头像 -->
           <el-dropdown trigger="click">
             <div class="avatar-container">
-              <el-avatar size="small" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
-              <span>管理员</span>
+              <el-avatar size="small" :src="userStore.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'" />
+              <span>{{ userStore.name || '管理员' }}</span>
             </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>个人中心</el-dropdown-item>
-                <el-dropdown-item>账户设置</el-dropdown-item>
+                <el-dropdown-item @click="goToProfile">个人中心</el-dropdown-item>
+                <el-dropdown-item @click="goToSetting">账户设置</el-dropdown-item>
                 <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -88,7 +125,9 @@
       <div class="content-container">
         <router-view v-slot="{ Component }">
           <transition name="fade" mode="out-in">
-            <component :is="Component" />
+            <keep-alive>
+              <component :is="Component" />
+            </keep-alive>
           </transition>
         </router-view>
       </div>
@@ -100,15 +139,26 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
-import { Monitor, Document, Fold } from '@element-plus/icons-vue'
+import { Monitor, Document, Fold, Expand, Setting } from '@element-plus/icons-vue'
 import { useThemeStore } from '../store/theme'
+import { useUserStore } from '../store/user'
+import { usePermissionStore } from '../store/permission'
+import Breadcrumb from '../components/Breadcrumb/index.vue'
 
 const router = useRouter()
 const route = useRoute()
 const themeStore = useThemeStore()
+const userStore = useUserStore()
+const permissionStore = usePermissionStore()
+
+// 侧边栏是否折叠
+const isCollapse = ref(false)
 
 // 当前激活的菜单
 const activeMenu = computed(() => route.path)
+
+// 权限路由
+const permissionRoutes = computed(() => permissionStore.routes)
 
 // 设置主题色
 const setThemeColor = (color) => {
@@ -122,6 +172,22 @@ const handleCommand = (command) => {
   }
 }
 
+// 切换侧边栏
+const toggleSidebar = () => {
+  isCollapse.value = !isCollapse.value
+}
+
+// 跳转到个人中心
+const goToProfile = () => {
+  router.push('/profile/index')
+}
+
+// 跳转到账户设置
+const goToSetting = () => {
+  // 可以实现账户设置页面
+  ElMessageBox.alert('账户设置功能开发中...', '提示')
+}
+
 // 退出登录
 const handleLogout = () => {
   ElMessageBox.confirm('确定要退出登录吗?', '提示', {
@@ -129,8 +195,7 @@ const handleLogout = () => {
     cancelButtonText: '取消',
     type: 'warning'
   }).then(() => {
-    localStorage.removeItem('token')
-    router.push('/login')
+    userStore.logout()
   }).catch(() => {})
 }
 
@@ -154,6 +219,10 @@ onMounted(() => {
     color: #fff;
     transition: all 0.3s;
     
+    &.is-collapsed {
+      width: 64px;
+    }
+    
     &-logo {
       height: 60px;
       display: flex;
@@ -164,6 +233,7 @@ onMounted(() => {
       h1 {
         font-size: 18px;
         color: #fff;
+        white-space: nowrap;
       }
     }
   }
@@ -184,9 +254,13 @@ onMounted(() => {
       padding: 0 20px;
       
       .navbar-left {
+        display: flex;
+        align-items: center;
+        
         .menu-toggle {
           font-size: 20px;
           cursor: pointer;
+          margin-right: 20px;
         }
       }
       
@@ -228,6 +302,13 @@ onMounted(() => {
       overflow-y: auto;
       background-color: var(--app-background);
     }
+  }
+}
+
+// 媒体查询
+@media screen and (max-width: 768px) {
+  .hidden-xs-only {
+    display: none;
   }
 }
 

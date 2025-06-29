@@ -51,15 +51,20 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+import { useUserStore } from '../../store/user'
+import { useThemeStore } from '../../store/theme'
 import { ElMessage } from 'element-plus'
 import { User, Lock, Moon, Sunny } from '@element-plus/icons-vue'
-import { useThemeStore } from '../../store/theme'
 
 const router = useRouter()
+const route = useRoute()
+const userStore = useUserStore()
 const themeStore = useThemeStore()
+
 const loading = ref(false)
 const loginFormRef = ref(null)
+const redirect = ref(route.query.redirect?.toString() || '/')
 
 // 登录表单
 const loginForm = reactive({
@@ -97,11 +102,12 @@ const handleLogin = async () => {
     loading.value = true
     
     try {
-      // 实际开发中这里应该调用API
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // 调用登录API
+      await userStore.login({
+        username: loginForm.username,
+        password: loginForm.password
+      })
       
-      // 模拟成功
-      localStorage.setItem('token', 'demo-token')
       if (loginForm.remember) {
         localStorage.setItem('username', loginForm.username)
       }
@@ -111,11 +117,11 @@ const handleLogin = async () => {
         message: '登录成功'
       })
       
-      // 跳转到首页
-      router.push({ path: '/' })
+      // 跳转到指定路径或首页
+      router.push({ path: redirect.value })
     } catch (error) {
       console.error('登录失败:', error)
-      ElMessage.error('登录失败，请检查用户名和密码')
+      ElMessage.error(error.message || '登录失败，请检查用户名和密码')
     } finally {
       loading.value = false
     }
@@ -127,6 +133,13 @@ const handleLogin = async () => {
 // 组件挂载时加载主题设置
 onMounted(() => {
   themeStore.loadThemeSettings()
+  
+  // 如果本地存储有用户名，自动填充
+  const savedUsername = localStorage.getItem('username')
+  if (savedUsername) {
+    loginForm.username = savedUsername
+    loginForm.remember = true
+  }
 })
 </script>
 
