@@ -10,12 +10,30 @@
         @click.middle="closeSelectedTag(tag)"
         @contextmenu.prevent="openMenu(tag, $event)"
       >
-        {{ tag.title }}
+        <el-icon v-if="tag.meta && tag.meta.icon" class="tag-icon">
+          <component :is="tag.meta.icon" />
+        </el-icon>
+        <span class="tag-title">{{ tag.title }}</span>
         <el-icon class="close-icon" @click.prevent.stop="closeSelectedTag(tag)">
           <Close />
         </el-icon>
       </router-link>
     </el-scrollbar>
+    
+    <!-- 快速操作按钮 -->
+    <div class="tags-view-actions">
+      <el-dropdown trigger="click" @command="handleTagCommand">
+        <el-button size="small" type="primary" plain class="action-button">
+          <el-icon><Operation /></el-icon>
+        </el-button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="closeOthers">关闭其他</el-dropdown-item>
+            <el-dropdown-item command="closeAll">关闭所有</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </div>
     
     <!-- 右键菜单 -->
     <ul v-show="visible" class="contextmenu" :style="{ left: left + 'px', top: top + 'px' }">
@@ -31,6 +49,7 @@
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useThemeStore } from '@/store/theme'
+import { ArrowDown, Operation } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -109,6 +128,20 @@ const closeAllTags = () => {
   router.push('/')
 }
 
+// 处理标签操作
+const handleTagCommand = (command) => {
+  switch (command) {
+    case 'closeOthers':
+      closeOthersTags(route)
+      break
+    case 'closeAll':
+      closeAllTags()
+      break
+    default:
+      break
+  }
+}
+
 // 跳转到最后一个标签
 const toLastTag = () => {
   const latestView = themeStore.visitedViews.slice(-1)[0]
@@ -162,25 +195,54 @@ onBeforeUnmount(() => {
 .tags-view-container {
   height: 34px;
   width: 100%;
-  background: #fff;
+  background: var(--el-bg-color);
   border-bottom: 1px solid #d8dce5;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 0 3px 0 rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  z-index: 8;
   
   .tags-view-wrapper {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0;
+    margin: 0;
+    
+    :deep(.el-scrollbar__wrap) {
+      padding: 0;
+      margin: 0;
+    }
+    
+    :deep(.el-scrollbar__view) {
+      display: inline-flex;
+      align-items: center;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+    
     .tags-view-item {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
       position: relative;
       cursor: pointer;
       height: 26px;
       line-height: 26px;
       border: 1px solid #d8dce5;
-      color: #495060;
-      background: #fff;
+      color: var(--el-text-color-primary);
+      background: var(--el-bg-color);
       padding: 0 8px;
       font-size: 12px;
       margin-left: 5px;
       margin-top: 4px;
+      margin-bottom: 4px;
       border-radius: 3px;
+      transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+      text-decoration: none;
       
       &:first-of-type {
         margin-left: 15px;
@@ -190,10 +252,19 @@ onBeforeUnmount(() => {
         margin-right: 15px;
       }
       
+      &:hover {
+        color: var(--el-color-primary);
+        border-color: var(--el-color-primary-light-5);
+        
+        .close-icon {
+          opacity: 1;
+        }
+      }
+      
       &.active {
-        background-color: v-bind('themeStore.primaryColor');
+        background-color: var(--el-color-primary);
         color: #fff;
-        border-color: v-bind('themeStore.primaryColor');
+        border-color: var(--el-color-primary);
         
         &::before {
           content: '';
@@ -203,31 +274,71 @@ onBeforeUnmount(() => {
           height: 8px;
           border-radius: 50%;
           position: relative;
-          margin-right: 2px;
+          margin-right: 4px;
         }
+        
+        .close-icon {
+          color: #fff;
+          
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+          }
+        }
+      }
+      
+      .tag-icon {
+        margin-right: 4px;
+        width: 14px;
+        height: 14px;
+      }
+      
+      .tag-title {
+        max-width: 80px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
       
       .close-icon {
         width: 16px;
         height: 16px;
-        vertical-align: -0.3em;
+        vertical-align: middle;
         border-radius: 50%;
         text-align: center;
         transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
         transform-origin: 100% 50%;
-        margin-left: 2px;
+        margin-left: 4px;
+        opacity: 0.6;
         
         &:hover {
           background-color: #b4bccc;
           color: #fff;
+          opacity: 1;
         }
+      }
+    }
+  }
+  
+  .tags-view-actions {
+    padding-right: 15px;
+    display: flex;
+    align-items: center;
+    min-width: 50px;
+    justify-content: flex-end;
+    
+    .action-button {
+      padding: 6px;
+      height: auto;
+      
+      .el-icon {
+        margin: 0;
       }
     }
   }
   
   .contextmenu {
     margin: 0;
-    background: #fff;
+    background: var(--el-bg-color);
     z-index: 3000;
     position: absolute;
     list-style-type: none;
@@ -235,7 +346,7 @@ onBeforeUnmount(() => {
     border-radius: 4px;
     font-size: 12px;
     font-weight: 400;
-    color: #333;
+    color: var(--el-text-color-primary);
     box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.3);
     
     li {
@@ -244,7 +355,7 @@ onBeforeUnmount(() => {
       cursor: pointer;
       
       &:hover {
-        background: #eee;
+        background: var(--el-color-primary-light-9);
       }
     }
   }
@@ -263,9 +374,13 @@ onBeforeUnmount(() => {
         background: #1f2d3d;
         
         &.active {
-          background-color: v-bind('themeStore.primaryColor');
+          background-color: var(--el-color-primary);
           color: #fff;
-          border-color: v-bind('themeStore.primaryColor');
+          border-color: var(--el-color-primary);
+        }
+        
+        &:hover {
+          color: var(--el-color-primary);
         }
       }
     }

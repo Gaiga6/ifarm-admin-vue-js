@@ -1,34 +1,48 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import defaultSettings from '@/settings'
+import { useStorage } from '@vueuse/core'
 
 // 预设主题颜色
-const PRESET_COLORS = {
-  default: '#409eff',
-  green: '#67c23a',
-  orange: '#e6a23c',
-  red: '#f56c6c',
-  purple: '#909399'
+export const PRESET_COLORS = {
+  default: '#409EFF',
+  primary: '#409EFF',
+  success: '#67C23A',
+  warning: '#E6A23C',
+  danger: '#F56C6C',
+  info: '#909399',
+  blue: '#324157',
+  red: '#C03639',
+  pink: '#E65D6E',
+  green: '#30B08F',
+  orange: '#FA8C16',
+  purple: '#722ED1'
 }
 
-// 获取本地存储的主题设置
+// 从本地存储获取设置
 const getStoredSettings = () => {
   try {
     const settings = localStorage.getItem('theme-settings')
     return settings ? JSON.parse(settings) : null
-  } catch (error) {
-    console.error('获取主题设置失败:', error)
+  } catch (e) {
+    console.error('Error parsing theme settings:', e)
     return null
   }
 }
 
-// 存储主题设置到本地
+// 保存设置到本地存储
 const storeSettings = (settings) => {
   try {
     localStorage.setItem('theme-settings', JSON.stringify(settings))
-  } catch (error) {
-    console.error('存储主题设置失败:', error)
+  } catch (e) {
+    console.error('Error storing theme settings:', e)
   }
+}
+
+// 生成主题色变体
+const generateColorVariants = (primaryColor) => {
+  document.documentElement.style.setProperty('--el-color-primary', primaryColor)
 }
 
 // 主题状态管理
@@ -36,83 +50,88 @@ export const useThemeStore = defineStore('theme', () => {
   // 从本地存储获取初始设置
   const storedSettings = getStoredSettings()
   
-  // 状态
-  const primaryColor = ref(storedSettings?.primaryColor || PRESET_COLORS.default)
-  const darkMode = ref(storedSettings?.darkMode || false)
-  const sidebarCollapsed = ref(storedSettings?.sidebarCollapsed || false)
-  const showTagsView = ref(storedSettings?.showTagsView !== false) // 默认显示
-  const fixedHeader = ref(storedSettings?.fixedHeader !== false) // 默认固定
-  const showBreadcrumb = ref(storedSettings?.showBreadcrumb !== false) // 默认显示
-  const showLogo = ref(storedSettings?.showLogo !== false) // 默认显示
-  const showFooter = ref(storedSettings?.showFooter !== false) // 默认显示
-  const contentFullScreen = ref(storedSettings?.contentFullScreen || false)
+  // 侧边栏状态
+  const sidebar = ref(useStorage('sidebar', {
+    opened: true,
+    withoutAnimation: false
+  }))
   
-  // 标签页导航
-  const visitedViews = ref(storedSettings?.visitedViews || [])
-  const cachedViews = ref([]) // 不需要持久化缓存
+  // 设备类型
+  const device = ref('desktop')
   
-  // 监听变化，保存到本地存储
-  watch(
-    [
-      primaryColor, 
-      darkMode, 
-      sidebarCollapsed, 
-      showTagsView, 
-      fixedHeader, 
-      showBreadcrumb,
-      showLogo,
-      showFooter,
-      contentFullScreen,
-      visitedViews
-    ],
-    () => {
-      storeSettings({
-        primaryColor: primaryColor.value,
-        darkMode: darkMode.value,
-        sidebarCollapsed: sidebarCollapsed.value,
-        showTagsView: showTagsView.value,
-        fixedHeader: fixedHeader.value,
-        showBreadcrumb: showBreadcrumb.value,
-        showLogo: showLogo.value,
-        showFooter: showFooter.value,
-        contentFullScreen: contentFullScreen.value,
-        visitedViews: visitedViews.value
-      })
-    },
-    { deep: true }
-  )
+  // 布局设置
+  const fixedHeader = ref(defaultSettings.fixedHeader)
+  const showSettings = ref(defaultSettings.showSettings)
+  const showTagsView = ref(defaultSettings.showTagsView)
+  const showSidebarLogo = ref(defaultSettings.showSidebarLogo)
+  const showFooter = ref(defaultSettings.showFooter)
+  const showBreadcrumb = ref(defaultSettings.enableBreadcrumb)
   
-  // 切换主题颜色
-  const changePrimaryColor = (color) => {
-    if (!color) return
-    
-    // 检查是否为预设颜色
-    if (Object.values(PRESET_COLORS).includes(color)) {
-      primaryColor.value = color
-      
-      // 更新CSS变量
-      document.documentElement.style.setProperty('--el-color-primary', color)
-      
-      // 生成其他级别的颜色
-      for (let i = 1; i <= 9; i++) {
-        const mix = i * 10
-        const colorMix = mix === 20 
-          ? 'rgba(64, 158, 255, 0.8)'
-          : mix === 10
-            ? 'rgba(64, 158, 255, 0.9)'
-            : `rgba(64, 158, 255, ${1 - mix / 100})`
-        document.documentElement.style.setProperty(`--el-color-primary-light-${i}`, colorMix)
+  // 主题设置
+  const darkMode = ref(useStorage('darkMode', defaultSettings.darkMode))
+  const primaryColor = ref(useStorage('primaryColor', defaultSettings.theme))
+  const themeColor = ref(useStorage('themeColor', defaultSettings.theme))
+  
+  // 侧边栏折叠状态
+  const sidebarCollapsed = ref(useStorage('sidebarCollapsed', false))
+  
+  // 内容区全屏
+  const contentFullScreen = ref(useStorage('contentFullScreen', false))
+  
+  // 标签视图
+  const visitedViews = ref([])
+  const cachedViews = ref([])
+  
+  // 加载主题设置
+  const loadThemeSettings = () => {
+    const storedSettings = getStoredSettings()
+    if (storedSettings) {
+      // 应用存储的主题色
+      if (storedSettings.primaryColor) {
+        primaryColor.value = storedSettings.primaryColor
+        generateColorVariants(storedSettings.primaryColor)
       }
       
-      // 设置暗色
-      document.documentElement.style.setProperty('--el-color-primary-dark-2', '#337ecc')
+      // 应用暗黑模式
+      if (storedSettings.darkMode) {
+        document.documentElement.classList.add('dark')
+      }
     }
+  }
+  
+  // 切换侧边栏
+  const toggleSideBar = () => {
+    sidebar.value.opened = !sidebar.value.opened
+    sidebar.value.withoutAnimation = false
+  }
+  
+  // 关闭侧边栏
+  const closeSideBar = ({ withoutAnimation }) => {
+    sidebar.value.opened = false
+    sidebar.value.withoutAnimation = withoutAnimation
+  }
+  
+  // 打开侧边栏
+  const openSideBar = ({ withoutAnimation }) => {
+    sidebar.value.opened = true
+    sidebar.value.withoutAnimation = withoutAnimation
+  }
+  
+  // 切换设备类型
+  const toggleDevice = (newDevice) => {
+    device.value = newDevice
+  }
+  
+  // 切换侧边栏折叠状态
+  const toggleSidebarCollapse = () => {
+    sidebarCollapsed.value = !sidebarCollapsed.value
   }
   
   // 切换暗黑模式
   const toggleDarkMode = () => {
     darkMode.value = !darkMode.value
     
+    // 更新 HTML 根元素的 class
     if (darkMode.value) {
       document.documentElement.classList.add('dark')
       document.body.setAttribute('data-theme', 'dark')
@@ -121,161 +140,162 @@ export const useThemeStore = defineStore('theme', () => {
       document.body.removeAttribute('data-theme')
     }
   }
-
-  // 切换侧边栏折叠状态
-  const toggleSidebarCollapse = () => {
-    sidebarCollapsed.value = !sidebarCollapsed.value
+  
+  // 设置主题颜色
+  const changePrimaryColor = (color) => {
+    if (!color) return
+    
+    // 检查是否为预设颜色
+    if (Object.values(PRESET_COLORS).includes(color)) {
+      primaryColor.value = color
+      themeColor.value = color
+      
+      // 生成并应用主题色变体
+      generateColorVariants(color)
+    }
   }
-
-  // 切换标签页显示
-  const toggleTagsView = () => {
-    showTagsView.value = !showTagsView.value
-  }
-
+  
   // 切换固定头部
   const toggleFixedHeader = () => {
     fixedHeader.value = !fixedHeader.value
   }
-
+  
+  // 切换标签视图
+  const toggleTagsView = () => {
+    showTagsView.value = !showTagsView.value
+  }
+  
+  // 切换侧边栏 Logo
+  const toggleSidebarLogo = () => {
+    showSidebarLogo.value = !showSidebarLogo.value
+  }
+  
   // 切换面包屑显示
   const toggleBreadcrumb = () => {
     showBreadcrumb.value = !showBreadcrumb.value
   }
-
-  // 切换Logo显示
-  const toggleLogo = () => {
-    showLogo.value = !showLogo.value
-  }
-
-  // 切换页脚显示
+  
+  // 切换页脚
   const toggleFooter = () => {
     showFooter.value = !showFooter.value
   }
-
+  
   // 切换内容区全屏
   const toggleContentFullScreen = () => {
     contentFullScreen.value = !contentFullScreen.value
   }
-
-  // 添加访问过的视图
-  const addVisitedView = (view) => {
-    if (!view?.path) return
-    
-    const index = visitedViews.value.findIndex(v => v.path === view.path)
-    if (index === -1) {
-      // 限制最大数量
-      if (visitedViews.value.length >= 20) {
-        visitedViews.value.shift()
-      }
-      visitedViews.value.push({
-        path: view.path,
-        title: view.meta?.title || 'Unknown',
-        name: view.name
-      })
-    }
-  }
-
-  // 添加缓存视图
-  const addCachedView = (view) => {
-    if (!view?.name || cachedViews.value.includes(view.name)) return
-    if (view.meta?.keepAlive) {
-      cachedViews.value.push(view.name)
-    }
-  }
-
-  // 删除访问过的视图
-  const delVisitedView = (view) => {
-    const index = visitedViews.value.findIndex(v => v.path === view.path)
-    if (index > -1) {
-      visitedViews.value.splice(index, 1)
-    }
-  }
-
-  // 删除缓存视图
-  const delCachedView = (view) => {
-    const index = cachedViews.value.indexOf(view.name)
-    if (index > -1) {
-      cachedViews.value.splice(index, 1)
-    }
-  }
-
-  // 删除其他视图
-  const delOthersViews = (view) => {
-    visitedViews.value = visitedViews.value.filter(v => v.path === view.path)
-    cachedViews.value = cachedViews.value.filter(name => name === view.name)
-  }
-
-  // 删除所有视图
-  const delAllViews = () => {
-    visitedViews.value = []
-    cachedViews.value = []
-  }
-
+  
   // 重置设置
   const resetSettings = () => {
     primaryColor.value = PRESET_COLORS.default
+    themeColor.value = PRESET_COLORS.default
     darkMode.value = false
     sidebarCollapsed.value = false
     showTagsView.value = true
     fixedHeader.value = true
     showBreadcrumb.value = true
-    showLogo.value = true
+    showSidebarLogo.value = true
     showFooter.value = true
     contentFullScreen.value = false
     
     // 更新CSS变量
-    document.documentElement.style.setProperty('--el-color-primary', PRESET_COLORS.default)
+    generateColorVariants(PRESET_COLORS.default)
     document.documentElement.classList.remove('dark')
     document.body.removeAttribute('data-theme')
-    
-    ElMessage.success('重置设置成功')
   }
-
-  // 初始化
-  if (storedSettings) {
-    // 应用存储的主题色
-    if (storedSettings.primaryColor) {
-      changePrimaryColor(storedSettings.primaryColor)
-    }
+  
+  // 添加访问视图
+  const addVisitedView = (view) => {
+    if (visitedViews.value.some(v => v.path === view.path)) return
     
-    // 应用暗黑模式
-    if (storedSettings.darkMode) {
-      document.documentElement.classList.add('dark')
-      document.body.setAttribute('data-theme', 'dark')
+    visitedViews.value.push(
+      Object.assign({}, view, {
+        title: view.meta.title || 'no-name'
+      })
+    )
+  }
+  
+  // 添加缓存视图
+  const addCachedView = (view) => {
+    if (cachedViews.value.includes(view.name)) return
+    if (!view.meta.noCache) {
+      cachedViews.value.push(view.name)
     }
+  }
+  
+  // 删除访问视图
+  const delVisitedView = (view) => {
+    const index = visitedViews.value.findIndex(v => v.path === view.path)
+    if (index !== -1) {
+      visitedViews.value.splice(index, 1)
+    }
+  }
+  
+  // 删除缓存视图
+  const delCachedView = (view) => {
+    const index = cachedViews.value.indexOf(view.name)
+    if (index !== -1) {
+      cachedViews.value.splice(index, 1)
+    }
+  }
+  
+  // 删除其他视图
+  const delOthersViews = (view) => {
+    visitedViews.value = visitedViews.value.filter(v => {
+      return v.meta.affix || v.path === view.path
+    })
+    
+    const index = cachedViews.value.indexOf(view.name)
+    if (index > -1) {
+      cachedViews.value = cachedViews.value.slice(index, index + 1)
+    } else {
+      cachedViews.value = []
+    }
+  }
+  
+  // 删除所有视图
+  const delAllViews = () => {
+    // 保留固定标签
+    visitedViews.value = visitedViews.value.filter(tag => tag.meta.affix)
+    cachedViews.value = []
   }
 
   return {
-    // 状态
-    primaryColor,
-    darkMode,
-    sidebarCollapsed,
-    showTagsView,
+    sidebar,
+    device,
     fixedHeader,
-    showBreadcrumb,
-    showLogo,
+    showSettings,
+    showTagsView,
+    showSidebarLogo,
     showFooter,
+    showBreadcrumb,
+    darkMode,
+    primaryColor,
+    themeColor,
+    sidebarCollapsed,
     contentFullScreen,
     visitedViews,
     cachedViews,
-    PRESET_COLORS,
-    
-    // 方法
-    changePrimaryColor,
-    toggleDarkMode,
+    loadThemeSettings,
+    toggleSideBar,
+    closeSideBar,
+    openSideBar,
+    toggleDevice,
     toggleSidebarCollapse,
-    toggleTagsView,
+    toggleDarkMode,
+    changePrimaryColor,
     toggleFixedHeader,
+    toggleTagsView,
+    toggleSidebarLogo,
     toggleBreadcrumb,
-    toggleLogo,
     toggleFooter,
     toggleContentFullScreen,
+    resetSettings,
     addVisitedView,
     addCachedView,
     delVisitedView,
     delCachedView,
     delOthersViews,
-    delAllViews,
-    resetSettings
+    delAllViews
   }
 }) 

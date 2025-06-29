@@ -13,12 +13,12 @@
     </template>
     
     <!-- 有子菜单的情况 -->
-    <el-sub-menu v-else :index="resolvePath(item.path)" popper-append-to-body>
+    <el-sub-menu v-else ref="subMenu" :index="resolvePath(item.path)" popper-append-to-body>
       <template #title>
         <el-icon v-if="item.meta && item.meta.icon">
           <component :is="item.meta.icon" />
         </el-icon>
-        <span>{{ item.meta.title }}</span>
+        <span v-if="item.meta">{{ item.meta.title }}</span>
       </template>
       
       <!-- 递归渲染子菜单 -->
@@ -66,7 +66,7 @@ const hasOneShowingChild = (children = [], parent) => {
     if (item.hidden) {
       return false
     } else {
-      // 如果只有一个子菜单，则递归判断
+      // 临时保存子菜单
       onlyOneChild.value = item
       return true
     }
@@ -104,6 +104,11 @@ const resolvePath = (routePath) => {
     margin-right: 8px;
     width: 24px;
     text-align: center;
+    vertical-align: middle;
   }
+}
+
+.submenu-title-noDropdown {
+  padding-left: 10px !important;
 }
 </style> 

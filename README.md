@@ -1,5 +1,117 @@
-# Vue 3 + Vite
+# iFarm Admin Vue.js 框架
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+一个基于Vue 3、Vite和Element Plus的现代化管理系统框架。
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## 特性
+
+- 📦 **基于Vue 3 & Vite**：享受Vue 3的Composition API和Vite的快速开发体验
+- 🔑 **基于角色的权限控制**：精细的权限管理系统
+- 🎨 **可定制主题**：支持主题色切换和深色模式
+- 📱 **响应式设计**：适配不同尺寸的屏幕和设备
+- 🧩 **模块化设计**：组件和功能高度模块化，易于维护和扩展
+- 🔍 **全局搜索**：快速查找菜单和内容
+- 🔖 **标签页导航**：多页面高效切换
+
+## 技术栈
+
+- **Vue 3**：前端框架
+- **Vite**：构建工具
+- **Pinia**：状态管理
+- **Vue Router**：路由管理
+- **Element Plus**：UI组件库
+- **SCSS**：CSS预处理器
+
+## 快速开始
+
+### 安装依赖
+
+```bash
+npm install
+```
+
+### 开发模式
+
+```bash
+npm run dev
+```
+
+### 构建生产版本
+
+```bash
+npm run build
+```
+
+## 项目结构
+
+```
+src/
+├── api/            # API请求
+├── assets/         # 静态资源
+├── components/     # 公共组件
+├── layout/         # 布局组件
+├── router/         # 路由配置
+├── store/          # 状态管理
+├── styles/         # 全局样式
+├── utils/          # 工具函数
+└── views/          # 页面组件
+```
+
+## 功能模块
+
+### 布局系统
+
+- 可折叠侧边栏
+- 顶部导航栏
+- 标签页导航
+- 面包屑导航
+- 页脚
+
+### 主题系统
+
+- 主题色切换
+- 深色/浅色模式
+- 布局设置（固定头部、显示标签栏等）
+
+### 权限系统
+
+- 基于角色的路由控制
+- 动态菜单生成
+- 权限指令
+
+### 搜索系统
+
+- 全局搜索功能
+- 支持菜单搜索
+- 快捷键支持（Ctrl+K）
+
+## 扩展计划
+
+### 近期计划
+
+1. **模块化扩展**：将现有组件进一步拆分为可复用模块
+2. **主题系统增强**：支持更多自定义主题色、暗色模式细节优化
+3. **布局系统扩展**：添加多种布局模式（经典、顶部、混合）
+
+### 中期计划
+
+1. **组件库扩展**：添加常用业务组件（表格、表单、图表等）
+2. **权限系统增强**：细粒度的按钮/操作权限控制
+3. **国际化支持**：添加多语言切换功能
+
+### 长期计划
+
+1. **数据可视化**：集成ECharts等图表库
+2. **移动端适配**：完善响应式设计，支持移动端操作
+3. **微前端架构**：支持微前端架构，实现模块化加载
+
+## 贡献指南
+
+1. Fork 项目
+2. 创建特性分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'Add some amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 创建Pull Request
+
+## 许可证
+
+[MIT](LICENSE)

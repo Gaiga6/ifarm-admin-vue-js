@@ -1,103 +1,149 @@
 <template>
-  <div class="settings-panel" :class="{ 'show-settings': showSettings }">
-    <div class="settings-trigger" @click="toggleSettings">
-      <el-icon><Setting /></el-icon>
+  <div class="settings-container">
+    <!-- 设置触发按钮 -->
+    <div class="settings-trigger" @click="showDrawer = true">
+      <el-tooltip content="系统设置" placement="left">
+        <el-button type="primary" circle>
+          <el-icon><Setting /></el-icon>
+        </el-button>
+      </el-tooltip>
     </div>
     
-    <div class="settings-content">
-      <div class="settings-header">
-        <span>系统设置</span>
-        <el-button type="primary" link @click="themeStore.resetSettings">
-          重置
-        </el-button>
-      </div>
-      
-      <div class="settings-body">
-        <div class="setting-item">
-          <span>主题模式</span>
-          <el-switch
-            v-model="darkMode"
-            inline-prompt
-            active-text="暗"
-            inactive-text="亮"
-            @change="themeStore.toggleDarkMode"
-          />
-        </div>
-        
-        <div class="setting-item">
-          <span>主题颜色</span>
-          <div class="theme-colors">
-            <div
-              v-for="(color, key) in themeStore.PRESET_COLORS"
-              :key="key"
-              class="color-item"
-              :class="{ active: themeStore.primaryColor === color }"
-              :style="{ backgroundColor: color }"
-              @click="themeStore.changePrimaryColor(color)"
-            ></div>
+    <!-- 设置抽屉 -->
+    <el-drawer
+      v-model="showDrawer"
+      title="系统设置"
+      direction="rtl"
+      size="300px"
+      :with-header="true"
+      :destroy-on-close="false"
+      :before-close="handleClose"
+    >
+      <div class="drawer-content">
+        <el-scrollbar height="100%">
+          <div class="setting-section">
+            <div class="section-header">
+              <span>主题设置</span>
+              <el-button type="primary" link @click="themeStore.resetSettings">
+                重置
+              </el-button>
+            </div>
+            
+            <div class="setting-item">
+              <span>主题模式</span>
+              <el-switch
+                v-model="darkMode"
+                inline-prompt
+                active-text="暗"
+                inactive-text="亮"
+                @change="themeStore.toggleDarkMode"
+              />
+            </div>
+            
+            <div class="setting-item">
+              <span>主题颜色</span>
+              <div class="theme-colors">
+                <div
+                  v-for="(color, key) in themeStore.PRESET_COLORS"
+                  :key="key"
+                  class="color-item"
+                  :class="{ active: themeStore.primaryColor === color }"
+                  :style="{ backgroundColor: color }"
+                  @click="themeStore.changePrimaryColor(color)"
+                ></div>
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <el-divider>界面显示</el-divider>
-        
-        <div class="setting-item">
-          <span>侧边栏折叠</span>
-          <el-switch
-            v-model="sidebarCollapsed"
-            @change="themeStore.toggleSidebarCollapse"
-          />
-        </div>
-        
-        <div class="setting-item">
-          <span>固定头部</span>
-          <el-switch
-            v-model="fixedHeader"
-            @change="themeStore.toggleFixedHeader"
-          />
-        </div>
-        
-        <div class="setting-item">
-          <span>显示标签栏</span>
-          <el-switch
-            v-model="showTagsView"
-            @change="themeStore.toggleTagsView"
-          />
-        </div>
-        
-        <div class="setting-item">
-          <span>显示面包屑</span>
-          <el-switch
-            v-model="showBreadcrumb"
-            @change="themeStore.toggleBreadcrumb"
-          />
-        </div>
-        
-        <div class="setting-item">
-          <span>显示Logo</span>
-          <el-switch
-            v-model="showLogo"
-            @change="themeStore.toggleLogo"
-          />
-        </div>
-        
-        <div class="setting-item">
-          <span>显示页脚</span>
-          <el-switch
-            v-model="showFooter"
-            @change="themeStore.toggleFooter"
-          />
-        </div>
+          
+          <el-divider />
+          
+          <div class="setting-section">
+            <div class="section-header">
+              <span>界面显示</span>
+            </div>
+            
+            <div class="setting-item">
+              <span>侧边栏折叠</span>
+              <el-switch
+                v-model="sidebarCollapsed"
+                @change="themeStore.toggleSidebarCollapse"
+              />
+            </div>
+            
+            <div class="setting-item">
+              <span>固定头部</span>
+              <el-switch
+                v-model="fixedHeader"
+                @change="themeStore.toggleFixedHeader"
+              />
+            </div>
+            
+            <div class="setting-item">
+              <span>显示标签栏</span>
+              <el-switch
+                v-model="showTagsView"
+                @change="themeStore.toggleTagsView"
+              />
+            </div>
+            
+            <div class="setting-item">
+              <span>显示面包屑</span>
+              <el-switch
+                v-model="showBreadcrumb"
+                @change="themeStore.toggleBreadcrumb"
+              />
+            </div>
+            
+            <div class="setting-item">
+              <span>显示Logo</span>
+              <el-switch
+                v-model="showLogo"
+                @change="themeStore.toggleLogo"
+              />
+            </div>
+            
+            <div class="setting-item">
+              <span>显示页脚</span>
+              <el-switch
+                v-model="showFooter"
+                @change="themeStore.toggleFooter"
+              />
+            </div>
+          </div>
+          
+          <el-divider />
+          
+          <div class="setting-section">
+            <div class="section-header">
+              <span>动画效果</span>
+            </div>
+            
+            <div class="setting-item">
+              <span>页面切换动画</span>
+              <el-select v-model="pageTransition" placeholder="选择动画" style="width: 120px">
+                <el-option label="淡入淡出" value="fade" />
+                <el-option label="滑动" value="slide" />
+                <el-option label="缩放" value="zoom" />
+                <el-option label="无" value="none" />
+              </el-select>
+            </div>
+          </div>
+        </el-scrollbar>
       </div>
-    </div>
+    </el-drawer>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useThemeStore } from '@/store/theme'
+import { Setting } from '@element-plus/icons-vue'
 
 const themeStore = useThemeStore()
-const showSettings = ref(false)
+const showDrawer = ref(false)
+
+// 页面过渡动画（预留功能）
+const pageTransition = ref('fade')
 
 // 计算属性，用于双向绑定
 const darkMode = computed({
@@ -135,144 +181,110 @@ const showFooter = computed({
   set: () => {}
 })
 
-// 切换设置面板
-const toggleSettings = () => {
-  showSettings.value = !showSettings.value
+// 关闭抽屉
+const handleClose = () => {
+  showDrawer.value = false
 }
+
+// 监听主题变化，更新页面样式
+watch(
+  () => themeStore.darkMode,
+  (isDark) => {
+    // 可以在这里添加更多的主题切换逻辑
+  }
+)
 </script>
 
 <style lang="scss" scoped>
-.settings-panel {
-  position: fixed;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  z-index: 2000;
-  
+.settings-container {
   .settings-trigger {
-    position: absolute;
+    position: fixed;
+    right: 20px;
     top: 50%;
-    right: 0;
     transform: translateY(-50%);
-    width: 36px;
-    height: 36px;
-    background: v-bind('themeStore.primaryColor');
-    color: #fff;
-    font-size: 18px;
-    text-align: center;
-    border-radius: 4px 0 0 4px;
+    z-index: 2000;
     cursor: pointer;
-    pointer-events: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.12);
+    transition: all 0.3s;
     
     &:hover {
-      opacity: 0.9;
+      transform: translateY(-50%) scale(1.1);
     }
   }
   
-  .settings-content {
-    position: absolute;
-    top: 50%;
-    right: 0;
-    transform: translateY(-50%) translateX(300px);
-    width: 300px;
-    height: 500px;
-    background: #fff;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.12);
-    border-radius: 4px 0 0 4px;
-    transition: transform 0.3s;
+  .drawer-content {
+    height: 100%;
     
-    .settings-header {
-      height: 50px;
-      line-height: 50px;
-      padding: 0 15px;
-      font-size: 16px;
-      font-weight: bold;
-      color: #333;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .settings-body {
-      padding: 15px;
-      height: calc(100% - 50px);
-      overflow-y: auto;
+    .setting-section {
+      padding: 0 16px;
+      
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        font-weight: bold;
+        font-size: 16px;
+      }
       
       .setting-item {
-        margin-bottom: 15px;
+        margin-bottom: 16px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         
         span {
-          font-size: 14px;
-          color: #606266;
+          color: var(--el-text-color-primary);
         }
       }
       
       .theme-colors {
         display: flex;
         flex-wrap: wrap;
+        gap: 8px;
         
         .color-item {
           width: 20px;
           height: 20px;
-          border-radius: 2px;
-          margin-right: 8px;
-          margin-bottom: 8px;
+          border-radius: 4px;
           cursor: pointer;
-          position: relative;
+          transition: transform 0.2s;
+          box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
           
-          &.active::after {
-            content: '✓';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            color: #fff;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgba(0, 0, 0, 0.2);
+          &:hover {
+            transform: scale(1.2);
+          }
+          
+          &.active {
+            position: relative;
+            
+            &::after {
+              content: '✓';
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #fff;
+              font-size: 14px;
+              text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+            }
           }
         }
       }
-    }
-  }
-  
-  &.show-settings {
-    .settings-content {
-      transform: translateY(-50%) translateX(0);
     }
   }
 }
 
-// 深色模式
-.dark {
-  .settings-panel {
-    .settings-content {
-      background: #304156;
-      
-      .settings-header {
-        color: #eee;
-        border-bottom: 1px solid #263445;
-      }
-      
-      .settings-body {
-        .setting-item {
-          span {
-            color: #eee;
-          }
-        }
-      }
-    }
-  }
+:deep(.el-drawer__header) {
+  margin-bottom: 0;
+  padding: 16px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+:deep(.el-drawer__body) {
+  padding: 0;
 }
 </style> 

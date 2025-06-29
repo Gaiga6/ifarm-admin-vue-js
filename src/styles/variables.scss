@@ -1,0 +1,195 @@
+// 主题色变量
+$--color-primary: var(--el-color-primary);
+$--color-success: var(--el-color-success);
+$--color-warning: var(--el-color-warning);
+$--color-danger: var(--el-color-danger);
+$--color-info: var(--el-color-info);
+
+// 文字颜色
+$--text-color-primary: var(--el-text-color-primary);
+$--text-color-regular: var(--el-text-color-regular);
+$--text-color-secondary: var(--el-text-color-secondary);
+$--text-color-placeholder: var(--el-text-color-placeholder);
+
+// 边框颜色
+$--border-color-base: var(--el-border-color);
+$--border-color-light: var(--el-border-color-lighter);
+$--border-color-lighter: var(--el-border-color-light);
+
+// 背景颜色
+$--background-color-base: var(--el-bg-color);
+$--background-color-light: var(--el-bg-color-page);
+$--background-color-lighter: var(--el-fill-color-lighter);
+
+// 布局相关
+$--sidebar-width: 210px;
+$--sidebar-collapsed-width: 64px;
+$--header-height: 50px;
+$--tags-view-height: 34px;
+$--footer-height: 50px;
+
+// 间距
+$--spacing-base: 8px;
+$--spacing-small: 4px;
+$--spacing-medium: 12px;
+$--spacing-large: 16px;
+$--spacing-xl: 24px;
+$--spacing-xxl: 32px;
+
+// 圆角
+$--border-radius-small: 2px;
+$--border-radius-base: 4px;
+$--border-radius-large: 8px;
+$--border-radius-circle: 50%;
+
+// 阴影
+$--box-shadow-base: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+$--box-shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+$--box-shadow-dark: 0 2px 16px 0 rgba(0, 0, 0, 0.2);
+
+// 过渡
+$--transition-duration: 0.3s;
+$--transition-duration-fast: 0.15s;
+$--transition-duration-slow: 0.5s;
+$--transition-function: ease;
+
+// 响应式断点
+$--breakpoint-xs: 576px;
+$--breakpoint-sm: 768px;
+$--breakpoint-md: 992px;
+$--breakpoint-lg: 1200px;
+$--breakpoint-xl: 1600px;
+
+// 混合器
+@mixin clearfix {
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+@mixin scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(144, 147, 153, 0.3);
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}
+
+@mixin ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin multi-ellipsis($lines) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $lines;
+  overflow: hidden;
+}
+
+// 响应式混合器
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == xs {
+    @media (max-width: $--breakpoint-xs) { @content; }
+  } @else if $breakpoint == sm {
+    @media (max-width: $--breakpoint-sm) { @content; }
+  } @else if $breakpoint == md {
+    @media (max-width: $--breakpoint-md) { @content; }
+  } @else if $breakpoint == lg {
+    @media (max-width: $--breakpoint-lg) { @content; }
+  } @else if $breakpoint == xl {
+    @media (max-width: $--breakpoint-xl) { @content; }
+  }
+}
+
+// 基础颜色
+$blue: #324157;
+$light-blue: #3a71a8;
+$red: #c03639;
+$pink: #e65d6e;
+$green: #30b08f;
+$tiffany: #4ab7bd;
+$yellow: #fec171;
+$panGreen: #30b08f;
+$orange: #ff9900;
+
+// 侧边栏
+$sideBarWidth: 210px;
+$sideBarHiddenWidth: 64px;
+
+// 导航栏
+$navbarHeight: 50px;
+
+// 标签栏
+$tagsViewHeight: 34px;
+
+// 页脚
+$footerHeight: 50px;
+
+// 主题颜色
+$themeColor: #409eff;
+
+// 基础布局
+$menuBg: #304156;
+$menuHover: #263445;
+$subMenuBg: #1f2d3d;
+$subMenuHover: #001528;
+$menuText: #bfcbd9;
+$menuActiveText: #409eff;
+
+// 过渡动画
+$transitionDuration: 0.3s;
+
+// 间距
+$spacingSmall: 8px;
+$spacingBase: 12px;
+$spacingLarge: 16px;
+$spacingXlarge: 24px;
+
+// 阴影
+$boxShadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+$dropShadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+
+// 响应式断点
+$mobileBreakpoint: 768px;
+$tabletBreakpoint: 992px;
+$desktopBreakpoint: 1200px;
+
+// 导出为CSS变量
+:root {
+  --theme-color: #{$themeColor};
+  --menu-bg: #{$menuBg};
+  --menu-hover: #{$menuHover};
+  --sub-menu-bg: #{$subMenuBg};
+  --sub-menu-hover: #{$subMenuHover};
+  --menu-text: #{$menuText};
+  --menu-active-text: #{$menuActiveText};
+  
+  --navbar-height: #{$navbarHeight};
+  --tags-view-height: #{$tagsViewHeight};
+  --footer-height: #{$footerHeight};
+  
+  --side-bar-width: #{$sideBarWidth};
+  --side-bar-hidden-width: #{$sideBarHiddenWidth};
+  
+  --spacing-small: #{$spacingSmall};
+  --spacing-base: #{$spacingBase};
+  --spacing-large: #{$spacingLarge};
+  --spacing-xlarge: #{$spacingXlarge};
+  
+  --transition-duration: #{$transitionDuration};
+  
+  --box-shadow: #{$boxShadow};
+  --drop-shadow: #{$dropShadow};
+} 

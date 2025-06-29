@@ -1,26 +1,35 @@
 <template>
   <div class="navbar" :class="{ 'fixed-header': themeStore.fixedHeader }">
-    <!-- 折叠按钮 -->
-    <div class="hamburger-container" @click="toggleSidebar">
-      <el-icon :class="{ 'is-active': !themeStore.sidebarCollapsed }">
-        <Expand v-if="themeStore.sidebarCollapsed" />
-        <Fold v-else />
-      </el-icon>
+    <!-- 左侧区域：折叠按钮和面包屑 -->
+    <div class="navbar-left">
+      <!-- 折叠按钮 -->
+      <div class="hamburger-container hover-effect" @click="toggleSidebar">
+        <el-icon :class="{ 'is-active': !themeStore.sidebarCollapsed }">
+          <Expand v-if="themeStore.sidebarCollapsed" />
+          <Fold v-else />
+        </el-icon>
+      </div>
+      
+      <!-- 面包屑 -->
+      <breadcrumb v-if="themeStore.showBreadcrumb" class="breadcrumb-container hide-on-sm" />
     </div>
     
-    <!-- 面包屑 -->
-    <breadcrumb v-if="themeStore.showBreadcrumb" class="breadcrumb-container" />
+    <!-- 中间区域：搜索框 -->
+    <div class="navbar-center">
+      <header-search />
+    </div>
     
-    <div class="right-menu">
+    <!-- 右侧区域：功能按钮 -->
+    <div class="navbar-right">
       <!-- 全屏按钮 -->
-      <div class="right-menu-item" @click="toggleFullScreen">
+      <div class="right-menu-item hover-effect hide-on-sm" @click="toggleFullScreen">
         <el-tooltip content="全屏" placement="bottom">
           <el-icon><FullScreen /></el-icon>
         </el-tooltip>
       </div>
       
       <!-- 主题切换 -->
-      <el-dropdown class="right-menu-item" trigger="click" @command="handleThemeCommand">
+      <el-dropdown class="right-menu-item hover-effect hide-on-sm" trigger="click" @command="handleThemeCommand">
         <div>
           <el-tooltip content="主题设置" placement="bottom">
             <el-icon><Setting /></el-icon>
@@ -48,7 +57,7 @@
       </el-dropdown>
       
       <!-- 主题色选择 -->
-      <el-dropdown class="right-menu-item" trigger="click" @command="handleColorCommand">
+      <el-dropdown class="right-menu-item hover-effect hide-on-sm" trigger="click" @command="handleColorCommand">
         <div>
           <el-tooltip content="主题色" placement="bottom">
             <div class="color-picker">
@@ -72,11 +81,15 @@
         </template>
       </el-dropdown>
       
-      <!-- 用户头像 -->
-      <el-dropdown class="avatar-container right-menu-item" trigger="click">
-        <div class="avatar-wrapper">
+      <!-- 用户信息 -->
+      <el-dropdown class="user-info-container right-menu-item" trigger="click">
+        <div class="user-wrapper">
           <el-avatar :size="30" :src="userStore.avatar" />
-          <el-icon><CaretBottom /></el-icon>
+          <div class="user-info hide-on-sm">
+            <span class="username ellipsis">{{ userStore.name }}</span>
+            <el-tag size="small" :type="userRoleType">{{ userRoleLabel }}</el-tag>
+          </div>
+          <el-icon class="el-icon--right"><CaretBottom /></el-icon>
         </div>
         <template #dropdown>
           <el-dropdown-menu>
@@ -98,10 +111,39 @@ import { ref, computed } from 'vue'
 import { useThemeStore } from '@/store/theme'
 import { useUserStore } from '@/store/user'
 import Breadcrumb from '@/components/Breadcrumb/index.vue'
+import HeaderSearch from '@/components/HeaderSearch/index.vue'
 import { ElMessage } from 'element-plus'
 
 const themeStore = useThemeStore()
 const userStore = useUserStore()
+
+// 用户角色标签
+const userRoleLabel = computed(() => {
+  switch (userStore.userType) {
+    case 0:
+      return '普通用户'
+    case 1:
+      return '农村管理员'
+    case 3:
+      return '平台管理员'
+    default:
+      return '未知角色'
+  }
+})
+
+// 用户角色类型
+const userRoleType = computed(() => {
+  switch (userStore.userType) {
+    case 0:
+      return 'info'
+    case 1:
+      return 'success'
+    case 3:
+      return 'danger'
+    default:
+      return 'info'
+  }
+})
 
 // 切换侧边栏折叠状态
 const toggleSidebar = () => {
@@ -163,10 +205,11 @@ const logout = async () => {
   height: 50px;
   overflow: hidden;
   position: relative;
-  background: #fff;
+  background: var(--el-bg-color);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   
   &.fixed-header {
     position: fixed;
@@ -177,60 +220,93 @@ const logout = async () => {
     transition: width 0.3s;
   }
   
-  .hamburger-container {
-    line-height: 46px;
-    height: 100%;
-    float: left;
-    padding: 0 15px;
-    cursor: pointer;
-    transition: background 0.3s;
-    
-    &:hover {
-      background: rgba(0, 0, 0, 0.025);
-    }
-    
-    .el-icon {
-      font-size: 20px;
-      
-      &.is-active {
-        transform: rotate(180deg);
-      }
-    }
-  }
-  
-  .breadcrumb-container {
-    float: left;
-  }
-  
-  .right-menu {
-    float: right;
-    height: 100%;
+  .navbar-left {
     display: flex;
     align-items: center;
     
-    .right-menu-item {
-      display: inline-block;
-      padding: 0 12px;
+    .hamburger-container {
+      line-height: 50px;
       height: 100%;
-      font-size: 18px;
-      color: #5a5e66;
-      vertical-align: middle;
+      padding: 0 15px;
       cursor: pointer;
+      transition: background 0.3s;
+      display: flex;
+      align-items: center;
       
-      &.hover-effect {
-        &:hover {
-          background: rgba(0, 0, 0, 0.025);
+      .el-icon {
+        font-size: 20px;
+        
+        &.is-active {
+          transform: rotate(180deg);
         }
       }
     }
     
-    .avatar-container {
-      .avatar-wrapper {
+    .breadcrumb-container {
+      padding: 0 15px;
+      display: flex;
+      align-items: center;
+    }
+  }
+  
+  .navbar-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+    max-width: 500px;
+  }
+  
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    
+    .right-menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 12px;
+      height: 100%;
+      font-size: 18px;
+      color: var(--el-text-color-primary);
+      vertical-align: middle;
+      cursor: pointer;
+    }
+    
+    .hover-effect {
+      &:hover {
+        background: rgba(0, 0, 0, 0.025);
+      }
+    }
+    
+    .user-info-container {
+      padding: 0 15px;
+      
+      .user-wrapper {
         display: flex;
         align-items: center;
         
         .el-avatar {
+          margin-right: 8px;
+        }
+        
+        .user-info {
           margin-right: 5px;
+          
+          .username {
+            display: block;
+            max-width: 80px;
+            font-size: 14px;
+            line-height: 1.2;
+            margin-bottom: 2px;
+          }
+          
+          .el-tag {
+            transform: scale(0.85);
+            transform-origin: left;
+          }
         }
       }
     }
@@ -268,10 +344,48 @@ const logout = async () => {
     background: #1f2d3d;
     color: #eee;
     
-    .right-menu {
+    .hover-effect:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .navbar-right {
       .right-menu-item {
         color: #eee;
       }
+    }
+  }
+}
+
+// 响应式布局
+@media (max-width: 992px) {
+  .navbar {
+    .navbar-center {
+      max-width: 60%;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    .navbar-center {
+      max-width: 50%;
+      padding: 0 5px;
+    }
+    
+    .navbar-right {
+      .right-menu-item {
+        padding: 0 8px;
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar {
+    .navbar-center {
+      max-width: none;
+      flex: 1;
+      justify-content: flex-start;
     }
   }
 }

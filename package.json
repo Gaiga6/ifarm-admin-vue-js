@@ -9,8 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vueuse/core": "^13.4.0",
     "axios": "^1.10.0",
     "element-plus": "^2.10.2",
+    "fuse.js": "^7.1.0",
     "nprogress": "^0.2.0",
     "path-browserify": "^1.0.1",
     "pinia": "^3.0.3",
