@@ -1,0 +1,67 @@
+/* 自定义Element Plus主题 */
+@use "element-plus/theme-chalk/src/index" as *;
+
+/* 全局主题覆盖 */
+:root {
+  /* 主题颜色变量会通过JS动态设置 */
+  --app-background: #f5f7fa;
+  --app-text-color: #2c3e50;
+  --app-container-background: #ffffff;
+  --app-border-color: #dcdfe6;
+  --app-shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* 暗黑模式 */
+.dark {
+  --app-background: #1a1a1a;
+  --app-text-color: #e0e0e0;
+  --app-container-background: #2c2c2c;
+  --app-border-color: #4c4c4c;
+  --app-shadow-color: rgba(0, 0, 0, 0.3);
+  
+  // Element Plus暗黑模式变量覆盖
+  --el-bg-color: #1a1a1a;
+  --el-text-color-primary: #e0e0e0;
+  --el-border-color-light: #4c4c4c;
+  --el-fill-color-blank: #2c2c2c;
+  --el-mask-color: rgba(0, 0, 0, 0.8);
+}
+
+/* 统一应用背景色 */
+body {
+  background-color: var(--app-background);
+  color: var(--app-text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 卡片样式 */
+.app-card {
+  background-color: var(--app-container-background);
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 var(--app-shadow-color);
+  padding: 20px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #c0c4cc;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f5f7fa;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: #5c5c5c;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background-color: #363636;
+} 

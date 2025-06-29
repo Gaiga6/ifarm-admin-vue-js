@@ -1,0 +1,44 @@
+/* 全局SCSS变量 */
+
+/* 默认颜色变量 */
+$primary-color: var(--el-color-primary);
+$success-color: var(--el-color-success);
+$warning-color: var(--el-color-warning);
+$danger-color: var(--el-color-danger);
+$info-color: var(--el-color-info);
+
+/* 字体大小 */
+$font-size-small: 12px;
+$font-size-base: 14px;
+$font-size-medium: 16px;
+$font-size-large: 18px;
+$font-size-xlarge: 20px;
+
+/* 边距 */
+$spacing-mini: 4px;
+$spacing-small: 8px;
+$spacing-base: 12px;
+$spacing-medium: 16px;
+$spacing-large: 20px;
+$spacing-xlarge: 24px;
+
+/* 边框 */
+$border-radius-small: 2px;
+$border-radius-base: 4px;
+$border-radius-large: 8px;
+$border-radius-circle: 50%;
+
+/* 断点 */
+$breakpoint-xs: 576px;
+$breakpoint-sm: 768px;
+$breakpoint-md: 992px;
+$breakpoint-lg: 1200px;
+$breakpoint-xl: 1600px;
+
+/* 阴影 */
+$box-shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+$box-shadow-base: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+$box-shadow-dark: 0 2px 12px 0 rgba(0, 0, 0, 0.3);
+
+/* 过渡 */
+$transition-all: all 0.3s ease-in-out; 
